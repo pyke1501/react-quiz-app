@@ -1,4 +1,5 @@
 import React from "react";
+import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
@@ -8,6 +9,11 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   const [categories, setCategories] = React.useState<ICategory[]>([]);
+
+  const [selectedCategory, setSelectedCategory] = React.useState("");
+  const [selectedDifficulty, setSelectedDifficulty] = React.useState("");
+  const [selectedType, setSelectedType] = React.useState("");
+  const [selectedAmount, setSelectedAmount] = React.useState(0);
 
   React.useEffect(() => {
     async function fetchCategories() {
@@ -24,7 +30,7 @@ export default function Dashboard() {
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    navigate('/question')
+    navigate(`/question?amount=${selectedAmount}&category=${selectedCategory}&difficulty=${selectedDifficulty}&type=${selectedType}`);
   }
 
   return (
@@ -35,14 +41,14 @@ export default function Dashboard() {
 
       <form onSubmit={onSubmit}>
         <Box>
-          <FormControl fullWidth>
+          <FormControl required fullWidth>
             <InputLabel id="category">Category</InputLabel>
             <Select
               labelId="category-label"
               id="category"
-              // value={age}
+              value={selectedCategory}
               label="Category"
-              // onChange={handleChange}
+              onChange={(e) => setSelectedCategory(e.target.value)}
             >
               {categories.map(cate => (
                 <MenuItem key={cate.id} value={cate.id}>{cate.name}</MenuItem>
@@ -50,14 +56,14 @@ export default function Dashboard() {
             </Select>
           </FormControl>
 
-          <FormControl fullWidth sx={{ mt: 3 }}>
+          <FormControl required fullWidth sx={{ mt: 3 }}>
             <InputLabel id="difficulty">Difficulty</InputLabel>
             <Select
               labelId="difficulty-label"
               id="difficulty"
-              // value={age}
+              value={selectedDifficulty}
               label="Difficulty"
-              // onChange={handleChange}
+              onChange={(e) => setSelectedDifficulty(e.target.value)}
             >
               <MenuItem value="easy">Easy</MenuItem>
               <MenuItem value="medium">Medium</MenuItem>
@@ -65,21 +71,23 @@ export default function Dashboard() {
             </Select>
           </FormControl>
 
-          <FormControl fullWidth sx={{ mt: 3 }}>
+          <FormControl required fullWidth sx={{ mt: 3 }}>
             <InputLabel id="difficulty">Type</InputLabel>
             <Select
               labelId="type-label"
               id="type"
-              // value={age}
+              value={selectedType}
               label="Type"
-              // onChange={handleChange}
+              onChange={(e) => setSelectedType(e.target.value)}
             >
               <MenuItem value="multiple">Multiple Choice</MenuItem>
               <MenuItem value="boolean">True/False</MenuItem>
             </Select>
           </FormControl>
 
-          <TextField id="outlined-basic" label="Amount of Questions" variant="outlined" fullWidth sx={{ mt: 3 }} />
+          <TextField required id="outlined-basic" label="Amount of Questions" variant="outlined" fullWidth sx={{ mt: 3 }} 
+            value={selectedAmount}
+            onChange={(e) => setSelectedAmount(Number(e.target.value))} />
         </Box>
 
         <Box sx={{ textAlign: 'center',  mt: 3 }}>
