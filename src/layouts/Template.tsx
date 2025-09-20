@@ -108,7 +108,7 @@ export default function Template(props: Props) {
           {drawer}
         </Drawer>
       </nav>
-      <Box component="main" sx={{ p: 3, width: '100%' }}>
+      <Box component="main" sx={{ p: 3, width: '100%', maxWidth: 'md', margin: '0 auto' }} >
         <Toolbar />
         <div>
           {props.children}

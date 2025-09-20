@@ -1,42 +1,34 @@
 import { Box, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import { CSVLink } from "react-csv";
+import convertDateTimeToString from "../../utils/convertDateTimeToString";
 
-const exportCSV = (data) => {
-  console.log("==========EXPORT==========");
-     
-};
+// leaderboard-
 
 export default function Leaderboard() {
-  const [data, setData] = useState([]);
+  const data =  JSON.parse(localStorage.getItem("userData")) || [];
 
-  useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem("userData")) || [];
-    setData(storedData);
-  }, []);
+  console.log('data: ', data)
+
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        bgcolor: "grey.50",
-        py: 6,
-        px: 2,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
-    >
-      <Typography variant="h3" fontWeight="bold" gutterBottom>
+    <>
+      <Typography variant="h2" gutterBottom align="center">
         Leaderboard
       </Typography>
-
-      <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => exportCSV(data)}
+      <Box sx={{ gap: 2, display: 'flex', justifyContent: 'flex-end' }}>
+        <CSVLink
+          data={data}
+          // filename={"my-file.csv"}
+          filename={convertDateTimeToString('leaderboard') + '.csv'}
+          target="_blank"
         >
-          EXPORT CSV
-        </Button>
+          <Button
+            variant="contained"
+            color="primary"
+          >
+            Export CSV
+          </Button>
+        </CSVLink>
+        
         <Button
           variant="outlined"
           color="primary"
@@ -46,7 +38,9 @@ export default function Leaderboard() {
         </Button>
       </Box>
 
-      <TableContainer component={Paper} sx={{ maxWidth: 800 }}>
+      <br />
+
+      <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
@@ -76,6 +70,6 @@ export default function Leaderboard() {
           </TableBody>
         </Table>
       </TableContainer>
-    </Box>
+    </>
   );
 }

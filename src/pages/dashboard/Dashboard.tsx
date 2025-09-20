@@ -1,12 +1,15 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
+import { useDispatch } from "react-redux";
 
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import type { ICategory } from "../../types";
+import { setFormQuestion } from "../../redux/questionSlice";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [categories, setCategories] = React.useState<ICategory[]>([]);
 
@@ -30,7 +33,15 @@ export default function Dashboard() {
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    navigate(`/question?amount=${selectedAmount}&category=${selectedCategory}&difficulty=${selectedDifficulty}&type=${selectedType}`);
+    const body = {
+      category: selectedCategory,
+      difficulty: selectedDifficulty,
+      type: selectedType,
+      amount: selectedAmount
+    }
+    dispatch(setFormQuestion(body))
+    navigate('/question');
+    // navigate(`/question?amount=${selectedAmount}&category=${selectedCategory}&difficulty=${selectedDifficulty}&type=${selectedType}`);
   }
 
   return (

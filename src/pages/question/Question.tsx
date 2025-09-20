@@ -2,28 +2,42 @@ import { Box, Button, Typography } from "@mui/material";
 import React from "react";
 import { decode } from 'html-entities';
 import type { IQuestion } from "../../types";
-import { useNavigate, useSearchParams } from "react-router";
+import { useNavigate } from "react-router";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../store";
+import { formatTimer } from "../../utils/formatTimer";
+
+interface ITimer {
+  [key: string]: number
+}
+
+const DIFFICULTY_TIME:ITimer = {
+  'easy': 30,
+  'medium': 20,
+  'hard': 15
+}
 
 // https://opentdb.com/api.php?amount=5&category=11&difficulty=easy&type=multiple
 export default function Question() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const formQuestion = useSelector((state: RootState) => state.question);
 
-  const amount = searchParams.get("amount");
-  const category = searchParams.get("category");
-  const difficulty = searchParams.get("difficulty");
-  const type = searchParams.get("type");
+  // const [searchParams] = useSearchParams();
+  // const amount = searchParams.get("amount");
+  // const category = searchParams.get("category");
+  // const difficulty = searchParams.get("difficulty");
+  // const type = searchParams.get("type");
 
   const [questionIndex, setQuestionIndex] = React.useState(0);
   const [dataSource, setDataSource] = React.useState<IQuestion[]>([]);
   const [options, setOptions] = React.useState<string[]>([]);
   const [score, setScore] = React.useState(0);
-  const [timeLeft, setTimeLeft] = React.useState(30);
+  const [timeLeft, setTimeLeft] = React.useState(DIFFICULTY_TIME[formQuestion.difficulty] || DIFFICULTY_TIME['easy']);
 
   React.useEffect(() => {
     async function fetchQuestions() {
       try {
-        const res = await fetch(`https://opentdb.com/api.php?amount=${amount}&category=${category}&difficulty=${difficulty}&type=${type}`);
+        const res = await fetch(`https://opentdb.com/api.php?amount=${formQuestion.amount}&category=${formQuestion.category}&difficulty=${formQuestion.difficulty}&type=${formQuestion.type}`);
         const data = await res.json();
         const questionItem = data.results[questionIndex];
         const answers = [...questionItem.incorrect_answers]; // [1,2,3]
@@ -38,27 +52,43 @@ export default function Question() {
     fetchQuestions();
   }, []);
 
-  React.useEffect(() => {
-    setTimeLeft(30);
-  }, [questionIndex]);
 
   //countdown
   React.useEffect(() => {
-    if (timeLeft <= 0) {
-      if (questionIndex + 1 === dataSource.length) {
-        navigate("/final-score");
-        return;
-      }
-      setQuestionIndex((prev) => prev + 1);
-      return;
-    }
+    // if (timeLeft <= 0) {
+    //   if (questionIndex + 1 === dataSource.length) {
+    //     navigate("/final-score");
+    //     return;
+    //   }
+    //   setQuestionIndex((prev) => prev + 1);
+    //   return;
+    // }
 
+    // const timer = setInterval(() => {
+    //   setTimeLeft((prev) => {
+    //     if (prev === 0) {
+    //       handleAnswer(xxx)
+    //     }
+    //     return prev - 1;
+    //   });
+    // }, 1000);
+
+    // return () => clearInterval(timer);
     const timer = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
-    }, 1000);
+      setTimeLeft(prevState => {
+        if (prevState > 0) {
+          return prevState - 1;
+        }
+        const randomContent = options[Math.floor(Math.random() * 4)];
+        handleAnswer(randomContent);
+        return DIFFICULTY_TIME[formQuestion.difficulty] 
+      })
+    }, 1000)
 
-    return () => clearInterval(timer);
-  }, [timeLeft]);
+    return () => {
+      clearInterval(timer);
+    }
+  }, [options]);
 
   // next question
   React.useEffect(() => {
@@ -88,11 +118,6 @@ export default function Question() {
     setQuestionIndex(prevState => prevState + 1)
   }
 
-  console.log('questions: ', {
-    questionIndex,
-    question: dataSource[questionIndex]
-  })
-
   return (
     <>
       <Typography variant="h4" gutterBottom align="center">
@@ -117,7 +142,7 @@ export default function Question() {
           Score: {score}/{dataSource.length}
         </Typography>
         <Typography variant="body1" gutterBottom color={timeLeft <= 5 ? "red" : "inherit"}>
-          Timer: {timeLeft}s
+          Timer: {formatTimer(timeLeft)}s
         </Typography>
       </Box>
     </>
